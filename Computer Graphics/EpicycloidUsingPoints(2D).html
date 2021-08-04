@@ -1,0 +1,112 @@
+<!-- saved from url=(0065)http://math.hws.edu/graphicsbook/source/webgl/simple-texture.html                 -->
+<!-- modified by Mohammad Imrul Jubair                                                                      -->
+<!-- edited by Tashreef Muhammad for Assignment                                                             -->
+<!-- help taken from:   Class Lecture, Content                                                              -->
+<!--                    GitHub => https://github.com/davidwparker/programmingtil-webgl                      -->
+<!--                    YouTube => https://www.youtube.com/playlist?list=PLPqKsyEGhUnaOdIFLKvdkXAQWD4DoXnFl -->
+<!--                    Tutorials Point => https://www.tutorialspoint.com/webgl/webgl_drawing_points.htm    -->
+
+<html>
+<title>Assignment - 2 | Part A | 170104014</title>
+<canvas id="webglcanvas" width="500" height="500"></canvas>
+
+<script>
+
+    var canvas = document.getElementById("webglcanvas");
+    var gl = canvas.getContext("webgl");
+
+    var vertexShaderSource =
+        `attribute vec3 a_coords;
+        
+		void main() {
+		  gl_Position = vec4(a_coords, 1.0);
+          gl_PointSize = 3.0;
+        }`;
+
+    var fragmentShaderSource =
+
+        `precision mediump float;
+        uniform vec3 u_color;
+        void main() {
+            gl_FragColor = vec4(u_color, 1.0);
+        }`;
+
+    var vsh = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vsh, vertexShaderSource);
+    gl.compileShader(vsh);
+
+    var fsh = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fsh, fragmentShaderSource);
+    gl.compileShader(fsh);
+
+    var prog = gl.createProgram();
+
+    gl.attachShader(prog, vsh);
+    gl.attachShader(prog, fsh);
+    gl.linkProgram(prog);
+    gl.useProgram(prog);
+
+    console.log(gl.getShaderParameter(vsh, gl.COMPILE_STATUS));
+    console.log(gl.getShaderParameter(fsh, gl.COMPILE_STATUS));
+    console.log(gl.getProgramParameter(prog, gl.LINK_STATUS));
+
+    k = 3.0;
+    r = 1 / (k + 3);
+    var values = pointGen(k, r);
+
+    // console.log(values.length / 2);
+    // console.log(values);
+
+    var a_coords_location = gl.getAttribLocation(prog, "a_coords");
+    var coords = new Float32Array(values);
+    var a_coords_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, a_coords_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, coords, gl.STATIC_DRAW);
+    gl.vertexAttribPointer(a_coords_location, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(a_coords_location);
+
+    var u_color_location = gl.getUniformLocation(prog, "u_color");
+    var color = new Float32Array([Math.random(), Math.random(), Math.random()]);
+    gl.uniform3fv(u_color_location, color);
+
+    gl.clearColor(1.0, 1.0, 0.9, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.POINTS, 0, values.length / 2);
+
+    canvas.onmousedown = function () {
+        k = k + 1;
+        r = ((k - 1)) * r / k;
+
+        values = pointGen(k, r);
+        
+        coords = new Float32Array(values);
+
+        a_coords_buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, a_coords_buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, coords, gl.STATIC_DRAW);
+        gl.vertexAttribPointer(a_coords_location, 2, gl.FLOAT, false, 0, 0);
+
+        u_color_location = gl.getUniformLocation(prog, "u_color");
+        color = new Float32Array([Math.random(), Math.random(), Math.random()]);
+        gl.uniform3fv(u_color_location, color);
+        gl.enableVertexAttribArray(a_coords_location);
+
+        gl.clearColor(1.0, 1.0, 0.9, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.drawArrays(gl.POINTS, 0, values.length / 2);
+    };
+
+    function pointGen(k, r) {
+        var values = [];
+
+        for (let i = 0.0; i < 360.0; i += 0.1) {
+            var radians = i * Math.PI / 180;
+            values.push(r * (k + 1) * Math.cos(radians) - r * Math.cos((k + 1) * radians));
+            values.push(r * (k + 1) * Math.sin(radians) - r * Math.sin((k + 1) * radians));
+        }
+
+        return values;
+    }
+
+</script>
+</html>

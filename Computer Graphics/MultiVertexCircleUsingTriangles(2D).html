@@ -1,0 +1,224 @@
+<!-- saved from url=(0065)http://math.hws.edu/graphicsbook/source/webgl/simple-texture.html                             -->
+<!-- modified by Mohammad Imrul Jubair                                                                                  -->
+<!-- edited by Tashreef Muhammad for Assignment                                                                         -->
+<!-- help taken from:   Class Lecture, Content                                                                          -->
+<!--                    egghead => https://egghead.io/lessons/webgl-apply-varying-colors-per-vertex-to-webgl-triangles  -->
+
+<html>
+<title>Assignment - 2 | Part B | 170104014</title>
+<canvas id="webglcanvas" width="500" height="500"></canvas>
+
+<script>
+
+    var canvas = document.getElementById("webglcanvas");
+    var gl = canvas.getContext("webgl");
+
+    var vertexShaderSource =
+        `attribute vec3 a_coords;
+	    attribute vec3 a_colors1;
+        attribute vec3 a_colors2;
+        attribute vec3 a_colors3;
+        uniform float u_click;
+		varying vec3 v_color;
+        
+		void main() {
+            gl_Position = vec4(a_coords, 1.0);
+
+            if (u_click == 1.0)
+                v_color = a_colors1;
+            else if(u_click == 2.0)
+                v_color = a_colors2;
+            else
+                v_color = a_colors3;
+        }`;
+
+    var fragmentShaderSource =
+        `precision mediump float;
+        varying vec3 v_color;
+        void main() {
+            gl_FragColor = vec4(v_color, 1.0);
+        }`;
+
+    var vsh = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vsh, vertexShaderSource);
+    gl.compileShader(vsh);
+
+    var fsh = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fsh, fragmentShaderSource);
+    gl.compileShader(fsh);
+
+    console.log(gl.getShaderParameter(vsh, gl.COMPILE_STATUS));
+    console.log(gl.getShaderParameter(fsh, gl.COMPILE_STATUS));
+
+    var prog = gl.createProgram();
+
+    gl.attachShader(prog, vsh);
+    gl.attachShader(prog, fsh);
+    gl.linkProgram(prog);
+    gl.useProgram(prog);
+
+    console.log(gl.getProgramParameter(prog, gl.LINK_STATUS));
+
+    var values = [];
+    var colors1 = [];
+    var colors2 = [];
+    var colors3 = [];
+    var v_cnt = 0;
+    var r = 0.5;
+
+    for (let i = -500; i <= 500; i += 5) {
+        values.push(i / 1000);
+        values.push(Math.sqrt(r * r - (i / 1000) * (i / 1000)));
+        ++v_cnt;
+
+        if (v_cnt % 2 == 0) {
+            colors1 = coloring(3, colors1);
+            colors2 = coloring(1, colors2);
+            colors3 = coloring(2, colors3);
+
+            values.push(0.0);
+            values.push(0.0);
+
+            colors1 = coloring(2, colors1);
+            colors2 = coloring(3, colors2);
+            colors3 = coloring(1, colors3);
+        }
+        else {
+            colors1 = coloring(1, colors1);
+            colors2 = coloring(2, colors2);
+            colors3 = coloring(3, colors3);
+        }
+    }
+    for (let i = 500; i >= -550; i -= 5) {
+        values.push(i / 1000);
+        values.push(-Math.sqrt(r * r - (i / 1000) * (i / 1000)));
+        ++v_cnt;
+
+        if (v_cnt % 2 == 0) {
+            colors1 = coloring(3, colors1);
+            colors2 = coloring(1, colors2);
+            colors3 = coloring(2, colors3);
+
+            values.push(0.0);
+            values.push(0.0);
+
+            colors1 = coloring(2, colors1);
+            colors2 = coloring(3, colors2);
+            colors3 = coloring(1, colors3);
+        }
+        else {
+            colors1 = coloring(1, colors1);
+            colors2 = coloring(2, colors2);
+            colors3 = coloring(3, colors3);
+        }
+    }
+
+    var a_coords_location = gl.getAttribLocation(prog, "a_coords");
+    console.log(values.length);
+    var coords = new Float32Array(values);
+
+    var a_coords_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, a_coords_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, coords, gl.STATIC_DRAW);
+    gl.vertexAttribPointer(a_coords_location, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(a_coords_location);
+
+    var u_click_location = gl.getUniformLocation(prog, "u_click");
+    var click = 0.0;
+    gl.uniform1f(u_click_location, click);
+
+    // Color 1
+    a_colors_location1 = gl.getAttribLocation(prog, "a_colors1");
+    colors1 = new Float32Array(colors1);
+
+    a_colors_buffer1 = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, a_colors_buffer1);
+    gl.bufferData(gl.ARRAY_BUFFER, colors1, gl.STATIC_DRAW);
+    gl.vertexAttribPointer(a_colors_location1, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(a_colors_location1);
+
+    // Color 2
+    a_colors_location2 = gl.getAttribLocation(prog, "a_colors2");
+    var colors2 = new Float32Array(colors2);
+
+    a_colors_buffer2 = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, a_colors_buffer2);
+    gl.bufferData(gl.ARRAY_BUFFER, colors2, gl.STATIC_DRAW);
+    gl.vertexAttribPointer(a_colors_location2, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(a_colors_location2);
+
+    // Color 3
+    a_colors_location3 = gl.getAttribLocation(prog, "a_colors3");
+    var colors3 = new Float32Array(colors3);
+
+    a_colors_buffer3 = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, a_colors_buffer3);
+    gl.bufferData(gl.ARRAY_BUFFER, colors3, gl.STATIC_DRAW);
+    gl.vertexAttribPointer(a_colors_location3, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(a_colors_location3);
+
+    gl.clearColor(0.75, 0.75, 0.75, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLES, 0, values.length / 2);
+
+    addEventListener('keydown', function (e) {
+        var values = [];
+        var v_cnt = 0;
+
+        for (let i = -500; i <= 500; i += 5) {
+            values.push(i / 1000);
+            values.push(Math.sqrt(r * r - (i / 1000) * (i / 1000)));
+            ++v_cnt;
+
+            if (v_cnt % 2 == 0) {
+                values.push(0.0);
+                values.push(0.0);
+            }
+        }
+        for (let i = 500; i >= -550; i -= 5) {
+            values.push(i / 1000);
+            values.push(-Math.sqrt(r * r - (i / 1000) * (i / 1000)));
+            ++v_cnt;
+
+            if (v_cnt % 2 == 0) {
+                values.push(0.0);
+                values.push(0.0);
+            }
+        }
+
+        var coords = new Float32Array(values);
+
+        var a_coords_buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, a_coords_buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, coords, gl.STATIC_DRAW);
+        gl.vertexAttribPointer(a_coords_location, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(a_coords_location);
+
+        click = parseFloat((parseInt(click) + 1) % 3);
+
+
+        gl.uniform1f(u_click_location, click);
+
+        gl.clearColor(0.75, 0.75, 0.75, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.drawArrays(gl.TRIANGLES, 0, values.length / 2);
+    }, true);
+
+    function coloring(colorPallete, values) {
+        var pallete = [
+            [1.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0],
+            [0.0, 0.0, 1.0]
+        ];
+
+        for (let i = 0; i < 3; ++i)
+            values.push(pallete[colorPallete - 1][i]);
+
+        return values;
+    }
+
+</script>
+
+
+
+</html>

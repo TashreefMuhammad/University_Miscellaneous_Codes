@@ -1,0 +1,67 @@
+<!-- saved from url=(0065)http://math.hws.edu/graphicsbook/source/webgl/simple-texture.html                 -->
+<!-- modified by Mohammad Imrul Jubair                                                                      -->
+<!-- edited by Tashreef Muhammad for Assignment                                                             -->
+<!-- help taken from:   Class Lecture, Content                                                              -->
+<!--                    GitHub => https://github.com/davidwparker/programmingtil-webgl                      -->
+<!--                    YouTube => https://www.youtube.com/playlist?list=PLPqKsyEGhUnaOdIFLKvdkXAQWD4DoXnFl -->
+
+<html>
+<title>Assignment - 1 | Section B</title>
+<canvas id="webglcanvas" width="500" height="500"></canvas>
+
+<script>
+
+    var canvas = document.getElementById("webglcanvas"); 
+    var  gl = canvas.getContext("webgl");
+    
+    var vShaderSource =
+       `attribute vec3 coords;
+        void main() {
+            gl_Position = vec4(coords, 1.0);
+        }`;
+
+
+    var fShaderSource =
+       `void main() {
+            gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0);
+        }`;
+    
+    var vsh = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vsh, vShaderSource);
+    gl.compileShader(vsh);
+
+    var fsh = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fsh, fShaderSource);
+    gl.compileShader(fsh);
+    
+    var prog = gl.createProgram(); 
+
+    gl.attachShader(prog, vsh); 
+    gl.attachShader(prog, fsh);
+    gl.linkProgram(prog); 
+    gl.useProgram(prog); 
+    
+
+    var coords_location = gl.getAttribLocation(prog, "coords");
+
+    var coords = new Float32Array([ -0.5,  0.3, 0.0,
+                                     0.5,  0.3, 0.0,
+                                    -0.5, -0.3, 0.0,
+                                    -0.5, -0.3, 0.0,
+                                     0.5,  0.3, 0.0,
+                                     0.5, -0.3, 0.0  ]);
+
+    var coords_buffer = gl.createBuffer();
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, coords_buffer); 
+    gl.bufferData(gl.ARRAY_BUFFER, coords, gl.STATIC_DRAW); 
+    gl.vertexAttribPointer(coords_location, 3, gl.FLOAT, false, 0, 0); 
+    gl.enableVertexAttribArray(coords_location);
+	
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLES, 0, 6); 
+
+</script>
+
+</html>
