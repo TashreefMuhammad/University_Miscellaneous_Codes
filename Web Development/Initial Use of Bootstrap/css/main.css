@@ -1,0 +1,46 @@
+.back{
+    height: 1000px;
+    background-image: url("../images/banner.jpg");
+    color: white;
+    margin: 0px;
+    padding: 0px;
+}
+.cards .card {
+    margin: 100px 0px;
+}
+
+.cards .card-body {
+    padding: 50px;
+}
+.icon {
+    width: 60px;
+    height: 60px;
+    background-color: rgb(0, 183, 255);
+    border-radius: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: -25px;
+    left: calc(50% - 30px);
+}
+.footer-icon {
+    border-top: 1px solid rgb(180, 180, 180);
+    display: inline-block;
+    width: 32%;
+    margin: 0px;
+    padding: 15px;
+}
+.footer-icon img {
+    width: 20px;
+    height: 20px;
+}
+.footer-icon p {
+    font-size: 10px;
+    margin: 0px;
+    padding: 0px;
+}
+.border-right-left {
+    border-left: 1px solid rgb(180, 180, 180);
+    border-right: 1px solid rgb(180, 180, 180);
+}
