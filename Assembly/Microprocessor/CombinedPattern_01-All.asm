@@ -1,0 +1,103 @@
+; ******************************************************
+; * EXPERIMENT NO.: 1                                  *
+; * GROUP NO.     : 1                                  *
+; * TOPIC         : Displaying a Distinct dot matrix,  *
+; *                 LED, 7 segment display pattern     * 
+; *                 repeatedly                         *
+; ******************************************************
+CODE	SEGMENT
+	ASSUME	CS:CODE,DS:CODE,ES:CODE,SS:CODE
+
+;DOT MATRIX CONSTANT DECLARATION
+PPIC_C	EQU	1EH
+PPIC	EQU	1CH 
+PPIB	EQU	1AH
+PPIA	EQU	18H
+
+;LED/7 SEGMENT CONSTANT DECLARATION
+PPIC_C1	EQU	1FH 
+PPIC1 	EQU	1DH
+PPIB1 	EQU	1BH
+PPIA1 	EQU	19H
+	
+    ORG	1000H
+    MOV	AL,10000000B
+	
+    ;ACTIVATING ALL PORTS
+    OUT	PPIC_C,AL
+    OUT	PPIC_C1,AL
+
+    MOV	AL,11111111B
+    OUT	PPIA,AL
+    OUT PPIA1,AL
+
+    MOV	AL,11110000B
+    OUT	PPIB1,AL
+
+    MOV	AL,00000000B
+    OUT	PPIC1,AL
+    OUT	PPIB,AL
+
+;START DENOTES THE STARTING POSITION OF ALL OPERATIONS
+START:
+;L1 & L2 COVERS THE DOT MATRIX DISPLAY
+L1: MOV	 AL,00000001B
+L2: OUT  PPIC,AL
+    CALL TIMER
+    CLC
+    ROL	 AL,1
+    JNC	 L2
+    MOV  AL,00000000B
+    OUT  PPIC,AL
+    JMP	 Le1		
+
+
+;Le1 & Le2 COVERS THE LED DISPLAY
+Le1: MOV  AL,00000000B
+     OUT  PPIC1,AL
+     MOV  AL,11110001B
+Le2: OUT  PPIB1,AL
+     CALL TIMER
+     SHL  AL,1
+     TEST AL,00010000B
+     JNZ  Lf2
+     OR   AL,11110000B
+     JMP  Le2
+
+;Lf1 & Lf2 COVERS THE 7 SEGMENT DISPLAY
+Lf2: MOV  AL,11110000B
+     OUT  PPIB1,AL
+     MOV  SI,OFFSET DATA
+Lf1: MOV  AL,BYTE PTR CS:[SI]
+     CMP  AL,00000000B
+     JE   START
+     OUT  PPIA1,AL
+     CALL TIMER
+     INC  SI
+     JMP  Lf1		
+     INT  3
+
+;TIMER HELPS KEEP OUTPUT TO DISPLAY		
+TIMER : MOV  CX,0FFFFH
+TIMER1: NOP
+        NOP
+        NOP
+        NOP
+        LOOP TIMER1
+        RET
+
+;ARRAY TO STORE 7 SEGMENT PATTERN
+DATA: DB 11000000B
+      DB 11111001B
+      DB 10100100B
+      DB 10110000B
+      DB 10011001B
+      DB 10010010B
+      DB 10000010B
+      DB 11111000B
+      DB 10000000B
+      DB 10010000B
+      DB 00000000B
+
+CODE	ENDS
+	END	
